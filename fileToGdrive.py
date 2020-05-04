@@ -1,5 +1,15 @@
 """
 test @ 20200501
+
+enable API
+https://developers.google.com/drive/api/v3/enable-drive-api
+edit OAuth 2.0 Client IDs
+select  Authorised redirect URIs
+add http://localhost:8080/
+then save
+
+download client secret and save as mysecret.json in current dir
+
 system environments
 GDRIVE_SECRET_PATH point to the client secret file
 TMP_SECRET_PATH point to the local secret token cache
