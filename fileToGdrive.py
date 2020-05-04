@@ -159,7 +159,9 @@ def main():
   toShareFolder = "To Share"
   localFileName = "test.txt"
 
-  gDrive = getGDrive( os.getenv("GDRIVE_SECRET_PATH") )
+  clientSecret = os.getenv("GDRIVE_SECRET_PATH")
+  if( clientSecret is None ): clientSecret = "mysecret.json"
+  gDrive = getGDrive( clientSecret )
   folderId = getIdByTitle_InFolder(gDrive, 'root', toShareFolder) 
   fileId = getIdByTitle_InFolder(gDrive, folderId, localFileName)
 
