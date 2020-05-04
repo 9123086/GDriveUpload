@@ -14,6 +14,11 @@ from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 import pickle 
 import fnmatch
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.getLogger('googleapiclient.discovery_cache').setLevel(logging.ERROR)
+logger = logging.getLogger( __name__ )
 
 
 def saveIntoCache(cachedFile, dataToCache):
@@ -29,7 +34,7 @@ def readFromCache(cachedFile):
     dataFromCache = pickle.load(infile)
     infile.close()
   except:
-    print("exception when read cached file")
+    logger.error("exception when read cached file")
 
   return dataFromCache
 
@@ -60,11 +65,7 @@ def getNewFileList(pathToFolder, fileNamePattern):
 
 
 def getFileTimeStamp(pathToFile):
-  """
-  Try to get the date that a file was created, falling back to when it was
-  last modified if that isn't possible.
-  See http://stackoverflow.com/a/39501288/1709587 for explanation.
-  """
+  
   if platform.system() == 'Windows':
       return os.path.getctime(pathToFile)
   else:
@@ -72,8 +73,6 @@ def getFileTimeStamp(pathToFile):
       stat = os.stat(pathToFile)
       return stat.st_birthtime
     except AttributeError:
-        # We're probably on Linux. No easy way to get creation dates here,
-        # so we'll settle for when its content was last modified.
         return stat.st_mtime
     except:
         return 0
@@ -106,16 +105,6 @@ def getGDrive(clientSecretPath):
 
   return drive
 
-def getFileIdByTitle(gDrive, targetTitle):
-  # View all folders and file in your Google Drive
-  fileList = gDrive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
-  fileID = ""
-  for file in fileList:
-    print('Title: %s, ID: %s' % (file['title'], file['id']))
-    # Get the folder ID that you want
-    if(file['title'] == targetTitle):
-        fileID = file['id']
-  return fileID
 
 def uploadFile(gDrive, localFilePath, destFileId):
   # Initialize GoogleDriveFile instance with file id.
@@ -124,23 +113,20 @@ def uploadFile(gDrive, localFilePath, destFileId):
 
   try:
     file1.Upload()
-    print('Created file %s with mimeType %s' % (file1['title'], file1['mimeType']))
+    logger.info('Created file %s with mimeType %s' % (file1['title'], file1['mimeType']))
   except Exception as e:
-    print("upload exception: ")
+    logger.error("upload exception: ")
     ex_type, ex, tb = sys.exc_info()
     traceback.print_tb(tb)
 
 
 def getIdByTitle_InFolder(gDrive, folderId, title):
-  """
-  file_list = drive.ListFile({'q': "'<folder ID>' in parents and trashed=false"}).GetList()
-  """
 
   qString = "'" + folderId + "' in parents and trashed=false"
   fileList = gDrive.ListFile({'q': qString}).GetList()
   fileID = ""
   for file in fileList:
-    #print('Title: %s, ID: %s' % (file['title'], file['id']))
+    #logger.info('Title: %s, ID: %s' % (file['title'], file['id']))
     
     if(file['title'] == title):
         fileID = file['id']
@@ -167,10 +153,10 @@ def main():
 
   if(fileId is None or fileId == ""):
     uploadFile(gDrive, localFileName, folderId)
-    print("=== file: %s uploaded" % localFileName)
+    logger.info("file: %s uploaded" % (localFileName))
   else:
     deleteFile(gDrive, fileId)
-    print("=== file: %s deleted" % localFileName)
+    logger.info("file: %s deleted" % (localFileName))
 
 if __name__ == '__main__':
     main()
