@@ -167,10 +167,10 @@ def main():
 
   if(fileId is None or fileId == ""):
     uploadFile(gDrive, localFileName, folderId)
-    print("file: %s uploaded" % localFileName)
+    print("=== file: %s uploaded" % localFileName)
   else:
     deleteFile(gDrive, fileId)
-    print("file: %s deleted" % localFileName)
+    print("=== file: %s deleted" % localFileName)
 
 if __name__ == '__main__':
     main()
